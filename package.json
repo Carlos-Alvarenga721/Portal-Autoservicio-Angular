@@ -1,0 +1,15 @@
+{
+  "name": "aap-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portal POC para disparar automatizaciones en Ansible Automation Platform (AAP)",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npx ng serve --proxy-config proxy.conf.json"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
