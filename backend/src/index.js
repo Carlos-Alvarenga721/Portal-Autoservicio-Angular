@@ -3,6 +3,9 @@
 // ─────────────────────────────────────────────────────────
 require('dotenv').config();
 
+const passport = require('passport');
+require('./routes/auth'); // inicializa la estrategia Google
+
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
@@ -17,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 // ── Middleware global ────────────────────────────────────
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+app.use(passport.initialize());
 
 // ── Rutas ────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);

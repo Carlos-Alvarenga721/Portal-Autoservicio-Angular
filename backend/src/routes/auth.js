@@ -1,38 +1,51 @@
 // ─────────────────────────────────────────────────────────
-// Rutas de autenticación
+// Rutas de autenticación — Google OAuth + JWT
 // ─────────────────────────────────────────────────────────
-const { Router }        = require('express');
+const { Router }          = require('express');
+const passport            = require('passport');
+const GoogleStrategy      = require('passport-google-oauth20').Strategy;
 const { findUserByEmail } = require('../db');
 const { signToken, authRequired } = require('../auth');
 
 const router = Router();
 
-/**
- * POST /api/auth/login
- * Body: { email: string }
- * Respuesta: { token, email, role }
- */
-router.post('/login', (req, res) => {
-  const { email } = req.body || {};
+// ── Configurar estrategia Google ─────────────────────────
+passport.use(new GoogleStrategy({
+  clientID:     process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL:  process.env.GOOGLE_CALLBACK_URL,
+}, (accessToken, refreshToken, profile, done) => {
+  const email = profile.emails?.[0]?.value?.toLowerCase();
+  if (!email) return done(null, false);
 
-  if (!email) {
-    return res.status(400).json({ error: 'El campo email es requerido' });
+  const user = findUserByEmail(email);
+  if (!user) return done(null, false, { message: 'Email no autorizado' });
+
+  return done(null, user);
+}));
+
+// ── Iniciar flujo OAuth ───────────────────────────────────
+router.get('/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false,
+  })
+);
+
+// ── Callback de Google ────────────────────────────────────
+router.get('/google/callback',
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: '/?error=acceso_denegado',
+  }),
+  (req, res) => {
+    const token = signToken({ email: req.user.email, role: req.user.role });
+    // Redirige al frontend con el token en la URL
+    res.redirect(`/?token=${token}&email=${req.user.email}&role=${req.user.role}`);
   }
+);
 
-  const user = findUserByEmail(email.toLowerCase().trim());
-  if (!user) {
-    return res.status(403).json({ error: 'Acceso denegado: email no autorizado' });
-  }
-
-  const token = signToken({ email: user.email, role: user.role });
-  return res.json({ token, email: user.email, role: user.role });
-});
-
-/**
- * GET /api/auth/me
- * Header: Authorization: Bearer <token>
- * Respuesta: { email, role }
- */
+// ── Verificar sesión activa ───────────────────────────────
 router.get('/me', authRequired, (req, res) => {
   return res.json({ email: req.user.email, role: req.user.role });
 });

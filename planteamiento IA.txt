@@ -1,0 +1,54 @@
+####### LO QUE TIENES ACTUALMENTE #########
+Backend (Node.js + Express)
+
+Servidor Express corriendo en puerto 3000
+Base de datos SQLite con tabla de usuarios y 2 usuarios de prueba (comercial@empresa.com y ops@empresa.com)
+Autenticación por JWT: endpoint POST /api/auth/login que recibe un email, valida contra la BD y devuelve un token
+Endpoint GET /api/auth/me para consultar el usuario autenticado
+Middleware authRequired que protege rutas verificando el token JWT en el header Authorization
+4 endpoints para disparar workflows en AAP (cis/audit, employees/create, ephemeral/create, ephemeral/delete), todos protegidos con JWT
+Módulo aap.js preparado para llamar a la API v2 de AAP (workflow_job_templates/launch), pero con URL y tokens placeholder
+Archivo .env.example con todas las variables necesarias documentadas
+Soporte para servir el frontend compilado en producción
+Frontend (Angular 18)
+
+Configuración con standalone components, lazy loading y routing
+Página de Login funcional con formulario de email, llamada al backend y almacenamiento del token en localStorage
+Auth guard que protege todas las rutas excepto /login
+Interceptor HTTP que adjunta automáticamente el token JWT a cada petición
+Dashboard (home page) con 3 tarjetas/botones que enlazan a los módulos de automatización
+Página CIS con botón para ejecutar auditoría
+Página Empleados con formulario completo (nombre, apellido, username, email, departamento, rol, grupos AD)
+Página Entornos Efímeros con campo de ID y botones para crear/eliminar
+Navbar que se muestra solo cuando el usuario está autenticado, con enlaces a todas las secciones y botón de cerrar sesión
+Servicio AuthService con login, logout, estado reactivo del usuario y persistencia en localStorage
+Servicio JobsService con métodos para llamar a los 4 endpoints de jobs
+Proxy configurado para redirigir /api al backend en desarrollo
+Infraestructura del proyecto
+
+Script npm run dev en la raíz que levanta backend y frontend en paralelo con concurrently
+Script npm run install:all para instalar dependencias de ambos proyectos
+Repositorio Git inicializado y pusheado a origin/main
+
+
+############# SIGUIENTES PASOS QUE FALTAN #############
+
+Crear el archivo backend/.env con los valores reales de conexión a tu instancia de Ansible Automation Platform (AAP_URL, tokens y IDs de workflow templates)
+
+Validar la conexión real con AAP: probar que los 4 endpoints de jobs disparen correctamente los workflows y devuelvan el job_id
+
+Agregar feedback del estado del job: actualmente solo recibes el job_id, pero no hay forma de consultar si el job terminó, falló o sigue en ejecución. Necesitarías un endpoint tipo GET /api/jobs/:id/status que consulte el estado del job en AAP y una interfaz en el frontend que muestre el progreso
+
+Manejo de errores más robusto: si el token de AAP expira, si el servidor AAP no responde, o si hay errores de validación, los mensajes al usuario son genéricos
+
+Eliminar el archivo app.component.html que contiene el template placeholder de Angular (337 líneas de HTML que no se usan porque app.component.ts usa template inline)
+
+Agregar control de acceso por roles: el backend ya diferencia entre commercial y ops para elegir el token de AAP, pero no restringe qué endpoints puede usar cada rol. Por ejemplo, podrías querer que solo ops pueda crear/eliminar entornos efímeros
+
+Agregar gestión de usuarios: actualmente solo hay 2 usuarios hardcodeados en la BD. Faltaría un CRUD de usuarios o al menos un mecanismo para agregar más sin tocar código
+
+Configurar variables de entorno para producción: JWT_SECRET tiene un valor por defecto inseguro ("dev-secret"), necesita uno fuerte en producción
+
+Agregar HTTPS/TLS para producción
+
+Agregar logs o historial de ejecuciones: guardar en la BD qué usuario disparó qué job y cuándo, para tener trazabilidad
