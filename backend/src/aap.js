@@ -4,7 +4,14 @@
 const https = require('https');
 const fetch = require('node-fetch');
 
-const AAP_URL = process.env.AAP_URL || 'https://10.10.0.10';
+function normalizeAapUrl(rawUrl) {
+  if (!rawUrl) return 'https://10.10.0.10';
+  return rawUrl.startsWith('http://') || rawUrl.startsWith('https://')
+    ? rawUrl
+    : `https://${rawUrl}`;
+}
+
+const AAP_URL = normalizeAapUrl(process.env.AAP_URL);
 const AAP_TOKEN = process.env.AAP_TOKEN;
 
 // Agente HTTPS que ignora certificados autofirmados (POC)
