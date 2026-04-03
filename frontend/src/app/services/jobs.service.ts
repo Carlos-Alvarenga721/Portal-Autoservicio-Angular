@@ -6,6 +6,17 @@ export interface JobResponse {
   job_id: number;
 }
 
+export interface JobStatusResponse {
+  job_id: number;
+  status: string;
+  failed: boolean;
+  job_type?: string;
+  name?: string;
+  started?: string | null;
+  finished?: string | null;
+  elapsed?: number;
+}
+
 // ── Payloads por operación ────────────────────────────────
 export interface AltaPayload {
   employee_username:        string; // carlos.alvarenga
@@ -55,6 +66,10 @@ export class JobsService {
   // ── CIS ──────────────────────────────────────────────────
   cisAudit(): Observable<JobResponse> {
     return this.http.post<JobResponse>('/api/jobs/cis', {});
+  }
+
+  getJobStatus(jobId: number): Observable<JobStatusResponse> {
+    return this.http.get<JobStatusResponse>(`/api/jobs/status/${jobId}`);
   }
 
   // ── Empleados ─────────────────────────────────────────────

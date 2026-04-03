@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   EphemeralCreatePayload,
   JobResponse,
+  JobStatusResponse,
   JobsService,
 } from '../../services/jobs.service';
 
@@ -71,6 +72,10 @@ import {
       <div class="result success" *ngIf="result">
         Job lanzado en AAP ({{ action }}). <strong>job_id: {{ result.job_id }}</strong>
       </div>
+      <div class="result status" *ngIf="jobStatus">
+        Estado actual: <strong>{{ jobStatus.status }}</strong>
+        <span *ngIf="jobStatus.elapsed !== undefined"> | Tiempo: {{ jobStatus.elapsed | number:'1.0-1' }}s</span>
+      </div>
       <div class="result error" *ngIf="error">
         {{ error }}
       </div>
@@ -113,11 +118,12 @@ import {
       margin-top: 1.5rem; padding: 1rem; border-radius: 4px;
       font-size: .95rem;
     }
+    .status  { background: #e8f1fb; color: #184a7a; }
     .success { background: #d4edda; color: #155724; }
     .error   { background: #f8d7da; color: #721c24; }
   `]
 })
-export class EphemeralComponent {
+export class EphemeralComponent implements OnDestroy {
   createForm: EphemeralCreatePayload = {
     instance_name: '',
     machine_family: 'e2',
@@ -130,9 +136,15 @@ export class EphemeralComponent {
   action: 'create' | 'delete' = 'create';
   loading = false;
   result: JobResponse | null = null;
+  jobStatus: JobStatusResponse | null = null;
   error = '';
+  private statusPollId: ReturnType<typeof setInterval> | null = null;
 
   constructor(private jobs: JobsService) {}
+
+  ngOnDestroy() {
+    this.stopPolling();
+  }
 
   createVm() {
     this.prepareRequest('create');
@@ -155,18 +167,45 @@ export class EphemeralComponent {
   private prepareRequest(action: 'create' | 'delete') {
     this.error = '';
     this.result = null;
+    this.jobStatus = null;
     this.action = action;
     this.loading = true;
+    this.stopPolling();
   }
 
   private handleSuccess(res: JobResponse) {
     this.result = res;
     this.loading = false;
+    this.startPolling(res.job_id);
   }
 
   private handleError(err: any, fallback: string) {
     this.error = this.formatErrorMessage(err.error?.error, fallback);
     this.loading = false;
+  }
+
+  private startPolling(jobId: number) {
+    this.fetchJobStatus(jobId);
+    this.statusPollId = setInterval(() => this.fetchJobStatus(jobId), 5000);
+  }
+
+  private fetchJobStatus(jobId: number) {
+    this.jobs.getJobStatus(jobId).subscribe({
+      next: (status) => {
+        this.jobStatus = status;
+        if (['successful', 'failed', 'error', 'canceled'].includes(status.status)) {
+          this.stopPolling();
+        }
+      },
+      error: () => this.stopPolling(),
+    });
+  }
+
+  private stopPolling() {
+    if (this.statusPollId) {
+      clearInterval(this.statusPollId);
+      this.statusPollId = null;
+    }
   }
 
   private formatErrorMessage(rawError: string | undefined, fallback: string): string {

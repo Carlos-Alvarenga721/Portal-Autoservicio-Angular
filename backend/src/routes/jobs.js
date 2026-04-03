@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────
 const { Router } = require('express');
 const { authRequired }                    = require('../auth');
-const { launchWorkflow, launchJobTemplate } = require('../aap');
+const { launchWorkflow, launchJobTemplate, getUnifiedJobStatus } = require('../aap');
 
 const router = Router();
 router.use(authRequired);
@@ -15,6 +15,22 @@ router.post('/cis', async (req, res) => {
     return res.json(result);
   } catch (err) {
     console.error('[CIS]', err.message);
+    return res.status(502).json({ error: err.message });
+  }
+});
+
+router.get('/status/:jobId', async (req, res) => {
+  try {
+    const jobId = Number(req.params.jobId);
+
+    if (!Number.isInteger(jobId) || jobId <= 0) {
+      return res.status(400).json({ error: 'jobId invalido' });
+    }
+
+    const result = await getUnifiedJobStatus(jobId);
+    return res.json(result);
+  } catch (err) {
+    console.error('[Job Status]', err.message);
     return res.status(502).json({ error: err.message });
   }
 });

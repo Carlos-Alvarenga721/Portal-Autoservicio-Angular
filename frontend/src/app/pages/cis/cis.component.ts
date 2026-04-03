@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { JobsService, JobResponse } from '../../services/jobs.service';
+import { JobsService, JobResponse, JobStatusResponse } from '../../services/jobs.service';
 
 @Component({
   selector: 'app-cis',
@@ -24,6 +24,10 @@ import { JobsService, JobResponse } from '../../services/jobs.service';
 
       <div class="result success" *ngIf="result">
         Workflow lanzado en AAP. <strong>job_id: {{ result.job_id }}</strong>
+      </div>
+      <div class="result status" *ngIf="jobStatus">
+        Estado actual: <strong>{{ jobStatus.status }}</strong>
+        <span *ngIf="jobStatus.elapsed !== undefined"> | Tiempo: {{ jobStatus.elapsed | number:'1.0-1' }}s</span>
       </div>
       <div class="result error" *ngIf="error">
         {{ error }}
@@ -58,29 +62,66 @@ import { JobsService, JobResponse } from '../../services/jobs.service';
       margin-top: 1.5rem; padding: 1rem; border-radius: 4px;
       font-size: .95rem;
     }
+    .status  { background: #e8f1fb; color: #184a7a; }
     .success { background: #d4edda; color: #155724; }
     .error   { background: #f8d7da; color: #721c24; }
   `]
 })
-export class CisComponent {
+export class CisComponent implements OnDestroy {
   loading = false;
   result: JobResponse | null = null;
+  jobStatus: JobStatusResponse | null = null;
   error = '';
+  private statusPollId: ReturnType<typeof setInterval> | null = null;
 
   constructor(private jobs: JobsService) {}
+
+  ngOnDestroy() {
+    this.stopPolling();
+  }
 
   runAudit() {
     this.error = '';
     this.result = null;
+    this.jobStatus = null;
     this.loading = true;
+    this.stopPolling();
 
     this.jobs.cisAudit().subscribe({
-      next: (res) => { this.result = res; this.loading = false; },
+      next: (res) => {
+        this.result = res;
+        this.loading = false;
+        this.startPolling(res.job_id);
+      },
       error: (err) => {
         this.error = this.formatErrorMessage(err.error?.error, 'Error al lanzar auditoria');
         this.loading = false;
       },
     });
+  }
+
+  private startPolling(jobId: number) {
+    this.fetchJobStatus(jobId);
+    this.statusPollId = setInterval(() => this.fetchJobStatus(jobId), 5000);
+  }
+
+  private fetchJobStatus(jobId: number) {
+    this.jobs.getJobStatus(jobId).subscribe({
+      next: (status) => {
+        this.jobStatus = status;
+        if (['successful', 'failed', 'error', 'canceled'].includes(status.status)) {
+          this.stopPolling();
+        }
+      },
+      error: () => this.stopPolling(),
+    });
+  }
+
+  private stopPolling() {
+    if (this.statusPollId) {
+      clearInterval(this.statusPollId);
+      this.statusPollId = null;
+    }
   }
 
   private formatErrorMessage(rawError: string | undefined, fallback: string): string {
