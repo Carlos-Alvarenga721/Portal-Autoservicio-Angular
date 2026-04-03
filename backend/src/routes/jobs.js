@@ -121,4 +121,58 @@ router.post('/employees/reset', async (req, res) => {
   }
 });
 
+// ── VM efímera - crear ───────────────────────────────────
+router.post('/ephemeral/create', async (req, res) => {
+  try {
+    const {
+      instance_name,
+      machine_family,
+      image_version,
+      disk_size_gb,
+      ttl_hours,
+    } = req.body || {};
+
+    if (!instance_name || !machine_family || !image_version || !disk_size_gb || !ttl_hours) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
+    }
+
+    const extraVars = {
+      instance_name,
+      machine_family,
+      image_version,
+      disk_size_gb: Number(disk_size_gb),
+      ttl_hours: Number(ttl_hours),
+      requested_by: req.user?.email || 'portal-user',
+    };
+
+    const result = await launchJobTemplate(process.env.AAP_JT_EPHEMERAL_VM_CREATE, extraVars);
+    return res.json(result);
+  } catch (err) {
+    console.error('[Ephemeral Create]', err.message);
+    return res.status(502).json({ error: err.message });
+  }
+});
+
+// ── VM efímera - eliminar ────────────────────────────────
+router.post('/ephemeral/delete', async (req, res) => {
+  try {
+    const { instance_name } = req.body || {};
+
+    if (!instance_name) {
+      return res.status(400).json({ error: 'Falta el nombre de la instancia' });
+    }
+
+    const extraVars = {
+      instance_name,
+      requested_by: req.user?.email || 'portal-user',
+    };
+
+    const result = await launchJobTemplate(process.env.AAP_JT_EPHEMERAL_VM_DELETE, extraVars);
+    return res.json(result);
+  } catch (err) {
+    console.error('[Ephemeral Delete]', err.message);
+    return res.status(502).json({ error: err.message });
+  }
+});
+
 module.exports = router;

@@ -20,8 +20,20 @@ import {
       <h2>Gestion de Empleados</h2>
       <p>Dispara los workflows y job templates de AAP para alta, baja, cambio de rol y reseteo de contrasena.</p>
 
+      <section class="card operation-card">
+        <label class="selector">
+          Operacion *
+          <select [(ngModel)]="selectedOperation" name="selected_operation">
+            <option value="alta">Alta</option>
+            <option value="baja">Baja</option>
+            <option value="cambio-rol">Cambio de rol</option>
+            <option value="reset">Reset de contrasena</option>
+          </select>
+        </label>
+      </section>
+
       <div class="grid">
-        <section class="card">
+        <section class="card" *ngIf="selectedOperation === 'alta'">
           <h3>Alta</h3>
           <form (ngSubmit)="onAlta()" class="form">
             <label>Username AD *
@@ -59,7 +71,7 @@ import {
           </form>
         </section>
 
-        <section class="card">
+        <section class="card" *ngIf="selectedOperation === 'baja'">
           <h3>Baja</h3>
           <form (ngSubmit)="onBaja()" class="form">
             <label>Username AD *
@@ -75,7 +87,7 @@ import {
           </form>
         </section>
 
-        <section class="card">
+        <section class="card" *ngIf="selectedOperation === 'cambio-rol'">
           <h3>Cambio de rol</h3>
           <form (ngSubmit)="onCambioRol()" class="form">
             <label>Usuario Oracle *
@@ -100,7 +112,7 @@ import {
           </form>
         </section>
 
-        <section class="card">
+        <section class="card" *ngIf="selectedOperation === 'reset'">
           <h3>Reset de contrasena AD</h3>
           <form (ngSubmit)="onReset()" class="form">
             <label>Username AD *
@@ -129,9 +141,10 @@ import {
     .page { padding: 2rem; max-width: 1100px; }
     h2 { color: #1a1a2e; margin-bottom: .5rem; }
     p { color: #555; margin-bottom: 1.5rem; }
+    .operation-card { margin-bottom: 1.25rem; }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: minmax(320px, 640px);
       gap: 1.25rem;
     }
     .card {
@@ -141,6 +154,13 @@ import {
       box-shadow: 0 2px 10px rgba(0,0,0,.08);
     }
     h3 { margin: 0 0 1rem; color: #1a1a2e; }
+    .selector {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      color: #333;
+      font-size: .9rem;
+    }
     .form { display: flex; flex-direction: column; gap: .75rem; }
     label { display: flex; flex-direction: column; font-weight: 600; color: #333; font-size: .9rem; }
     input, select {
@@ -175,6 +195,7 @@ export class EmployeesComponent {
   loading = false;
   result: JobResponse | null = null;
   error = '';
+  selectedOperation: 'alta' | 'baja' | 'cambio-rol' | 'reset' = 'alta';
   action: 'alta' | 'baja' | 'cambio-rol' | 'reset' | null = null;
 
   alta: AltaPayload = {

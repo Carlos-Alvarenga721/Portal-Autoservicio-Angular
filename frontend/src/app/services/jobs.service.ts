@@ -31,6 +31,18 @@ export interface ResetPayload {
   employee_password: string;
 }
 
+export interface EphemeralCreatePayload {
+  instance_name: string;
+  machine_family: 'e2' | 'n2';
+  image_version: 'rhel-8' | 'rhel-9';
+  disk_size_gb: number;
+  ttl_hours: number;
+}
+
+export interface EphemeralDeletePayload {
+  instance_name: string;
+}
+
 // ── Utilidad de transformación de username ────────────────
 export function toOracleUsername(adUsername: string): string {
   return adUsername.toUpperCase().replace(/\./g, '_');
@@ -62,12 +74,12 @@ export class JobsService {
     return this.http.post<JobResponse>('/api/jobs/employees/reset', payload);
   }
 
-  // ── Efímeros (pendiente de implementar en backend) ────────
-  ephemeralCreate(envId: string): Observable<JobResponse> {
-    return this.http.post<JobResponse>('/api/jobs/ephemeral/create', { envId });
+  // ── Efímeros ──────────────────────────────────────────────
+  ephemeralCreate(payload: EphemeralCreatePayload): Observable<JobResponse> {
+    return this.http.post<JobResponse>('/api/jobs/ephemeral/create', payload);
   }
 
-  ephemeralDelete(envId: string): Observable<JobResponse> {
-    return this.http.post<JobResponse>('/api/jobs/ephemeral/delete', { envId });
+  ephemeralDelete(payload: EphemeralDeletePayload): Observable<JobResponse> {
+    return this.http.post<JobResponse>('/api/jobs/ephemeral/delete', payload);
   }
 }
