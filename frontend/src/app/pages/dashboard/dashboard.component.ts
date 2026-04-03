@@ -14,7 +14,7 @@ import { AuthService } from '../../services/auth.service';
         <a routerLink="/cis" class="card">
           <div class="card-icon">🛡️</div>
           <h3>Seguridad CIS</h3>
-          <p>Ejecutar auditoría de cumplimiento CIS</p>
+          <p>Ejecutar Estandarizacion de cumplimiento CIS</p>
         </a>
 
         <a routerLink="/employees" class="card">
