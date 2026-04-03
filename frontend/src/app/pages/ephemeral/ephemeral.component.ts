@@ -72,8 +72,8 @@ import {
       <div class="result success" *ngIf="result">
         Job lanzado en AAP ({{ action }}). <strong>job_id: {{ result.job_id }}</strong>
       </div>
-      <div class="result status" *ngIf="jobStatus">
-        Estado actual: <strong>{{ jobStatus.status }}</strong>
+      <div class="result status" *ngIf="jobStatus" [class.status-pending]="jobStatus.status === 'pending'" [class.status-running]="jobStatus.status === 'running'" [class.status-successful]="jobStatus.status === 'successful'" [class.status-failed]="isFailedStatus(jobStatus.status)">
+        Estado actual: <strong>{{ getStatusLabel(jobStatus.status) }}</strong>
         <span *ngIf="jobStatus.elapsed !== undefined"> | Tiempo: {{ jobStatus.elapsed | number:'1.0-1' }}s</span>
       </div>
       <div class="result error" *ngIf="error">
@@ -119,6 +119,10 @@ import {
       font-size: .95rem;
     }
     .status  { background: #e8f1fb; color: #184a7a; }
+    .status-pending { background: #fff4d6; color: #8a6d1d; }
+    .status-running { background: #e8f1fb; color: #184a7a; }
+    .status-successful { background: #d4edda; color: #155724; }
+    .status-failed { background: #f8d7da; color: #721c24; }
     .success { background: #d4edda; color: #155724; }
     .error   { background: #f8d7da; color: #721c24; }
   `]
@@ -206,6 +210,23 @@ export class EphemeralComponent implements OnDestroy {
       clearInterval(this.statusPollId);
       this.statusPollId = null;
     }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'pending': return 'En cola';
+      case 'waiting': return 'Esperando';
+      case 'running': return 'Ejecutando';
+      case 'successful': return 'Completado';
+      case 'failed': return 'Fallido';
+      case 'error': return 'Error';
+      case 'canceled': return 'Cancelado';
+      default: return status;
+    }
+  }
+
+  isFailedStatus(status: string): boolean {
+    return ['failed', 'error', 'canceled'].includes(status);
   }
 
   private formatErrorMessage(rawError: string | undefined, fallback: string): string {
