@@ -36,6 +36,29 @@ async function fetchAapJson(url, options = {}) {
   return response.json();
 }
 
+async function fetchAapJsonAllow404(url, options = {}) {
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${AAP_TOKEN}`,
+      ...(options.headers || {}),
+    },
+    agent,
+    ...options,
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`AAP respondió ${response.status}: ${text}`);
+  }
+
+  return response.json();
+}
+
 /**
  * Lanza un Workflow Job Template en AAP.
  */
@@ -61,19 +84,39 @@ async function launchJobTemplate(jtId, extraVars = {}) {
 }
 
 async function getUnifiedJobStatus(jobId) {
-  const url = `${AAP_URL}/api/v2/unified_jobs/${jobId}/`;
-  const data = await fetchAapJson(url);
+  const workflowUrl = `${AAP_URL}/api/v2/workflow_jobs/${jobId}/`;
+  const workflowData = await fetchAapJsonAllow404(workflowUrl);
 
-  return {
-    job_id: data.id,
-    status: data.status,
-    failed: Boolean(data.failed),
-    job_type: data.type,
-    name: data.name,
-    started: data.started,
-    finished: data.finished,
-    elapsed: data.elapsed,
-  };
+  if (workflowData) {
+    return {
+      job_id: workflowData.id,
+      status: workflowData.status,
+      failed: Boolean(workflowData.failed),
+      job_type: workflowData.type,
+      name: workflowData.name,
+      started: workflowData.started,
+      finished: workflowData.finished,
+      elapsed: workflowData.elapsed,
+    };
+  }
+
+  const jobUrl = `${AAP_URL}/api/v2/jobs/${jobId}/`;
+  const jobData = await fetchAapJsonAllow404(jobUrl);
+
+  if (jobData) {
+    return {
+      job_id: jobData.id,
+      status: jobData.status,
+      failed: Boolean(jobData.failed),
+      job_type: jobData.type,
+      name: jobData.name,
+      started: jobData.started,
+      finished: jobData.finished,
+      elapsed: jobData.elapsed,
+    };
+  }
+
+  throw new Error(`AAP respondió 404: {"detail":"The requested resource could not be found."}`);
 }
 
 module.exports = { launchWorkflow, launchJobTemplate, getUnifiedJobStatus };
