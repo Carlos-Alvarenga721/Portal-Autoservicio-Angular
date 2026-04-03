@@ -1,28 +1,29 @@
 // ─────────────────────────────────────────────────────────
-// Servicio genérico para disparar workflows en AAP
+// Servicio para disparar workflows y job templates en AAP
 // ─────────────────────────────────────────────────────────
+const https = require('https');
 const fetch = require('node-fetch');
 
-const AAP_URL = process.env.AAP_URL || 'https://aap-controller.example';
+const AAP_URL = process.env.AAP_URL || 'https://10.10.0.10';
+const AAP_TOKEN = process.env.AAP_TOKEN;
+
+// Agente HTTPS que ignora certificados autofirmados (POC)
+const agent = new https.Agent({ rejectUnauthorized: false });
 
 /**
- * Lanza un workflow_job_template en AAP.
- *
- * @param {string|number} workflowId  – ID numérico o path del workflow template
- * @param {object}        extraVars   – Variables extra que recibe el workflow
- * @param {string}        token       – Bearer token de servicio (AAP)
- * @returns {{ job_id: number }}
+ * Lanza un Workflow Job Template en AAP.
  */
-async function launchAapWorkflow(workflowId, extraVars = {}, token) {
+async function launchWorkflow(workflowId, extraVars = {}) {
   const url = `${AAP_URL}/api/v2/workflow_job_templates/${workflowId}/launch/`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${AAP_TOKEN}`,
     },
     body: JSON.stringify({ extra_vars: extraVars }),
+    agent,
   });
 
   if (!response.ok) {
@@ -35,13 +36,28 @@ async function launchAapWorkflow(workflowId, extraVars = {}, token) {
 }
 
 /**
- * Elige el token AAP apropiado según el rol del usuario.
- *   commercial  → AAP_TOKEN_AUDIT
- *   ops         → AAP_TOKEN_OPS
+ * Lanza un Job Template directo en AAP.
  */
-function tokenForRole(role) {
-  if (role === 'ops') return process.env.AAP_TOKEN_OPS;
-  return process.env.AAP_TOKEN_AUDIT;
+async function launchJobTemplate(jtId, extraVars = {}) {
+  const url = `${AAP_URL}/api/v2/job_templates/${jtId}/launch/`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${AAP_TOKEN}`,
+    },
+    body: JSON.stringify({ extra_vars: extraVars }),
+    agent,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`AAP respondió ${response.status}: ${text}`);
+  }
+
+  const data = await response.json();
+  return { job_id: data.id };
 }
 
-module.exports = { launchAapWorkflow, tokenForRole };
+module.exports = { launchWorkflow, launchJobTemplate };

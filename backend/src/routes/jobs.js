@@ -2,81 +2,121 @@
 // Rutas para disparar jobs en AAP
 // ─────────────────────────────────────────────────────────
 const { Router } = require('express');
-const { authRequired }           = require('../auth');
-const { launchAapWorkflow, tokenForRole } = require('../aap');
+const { authRequired }                    = require('../auth');
+const { launchWorkflow, launchJobTemplate } = require('../aap');
 
 const router = Router();
-
-// Todas las rutas de /api/jobs requieren autenticación
 router.use(authRequired);
 
-// ── CIS Audit ────────────────────────────────────────────
-router.post('/cis/audit', async (req, res) => {
+// ── CIS Level 1 ──────────────────────────────────────────
+router.post('/cis', async (req, res) => {
   try {
-    const wfId  = process.env.AAP_WF_CIS_AUDIT;
-    const token = tokenForRole(req.user.role);
-    const result = await launchAapWorkflow(wfId, {}, token);
+    const result = await launchWorkflow(process.env.AAP_WF_CIS);
     return res.json(result);
   } catch (err) {
-    console.error('[CIS Audit]', err.message);
+    console.error('[CIS]', err.message);
     return res.status(502).json({ error: err.message });
   }
 });
 
-// ── Employee Onboard ─────────────────────────────────────
-router.post('/employees/create', async (req, res) => {
+// ── Alta de empleado ─────────────────────────────────────
+router.post('/employees/alta', async (req, res) => {
   try {
-    const { firstName, lastName, username, email, department, role, adGroups } = req.body || {};
+    const {
+      employee_username,
+      employee_oracle_username,
+      employee_full_name,
+      employee_password,
+      employee_role,
+    } = req.body || {};
 
-    if (!firstName || !lastName || !username || !email) {
-      return res.status(400).json({ error: 'Campos obligatorios: firstName, lastName, username, email' });
+    if (!employee_username || !employee_oracle_username || !employee_full_name || !employee_password) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    const extraVars = { firstName, lastName, username, email, department, role, adGroups };
-    const wfId  = process.env.AAP_WF_EMPLOYEE_ONBOARD;
-    const token = tokenForRole(req.user.role);
-    const result = await launchAapWorkflow(wfId, extraVars, token);
+    const extraVars = {
+      employee_action: 'alta',
+      employee_username,
+      employee_oracle_username,
+      employee_full_name,
+      employee_password,
+      employee_role: employee_role || 'APP_READONLY',
+    };
+
+    const result = await launchWorkflow(process.env.AAP_WF_EMP_ALTA, extraVars);
     return res.json(result);
   } catch (err) {
-    console.error('[Employee Create]', err.message);
+    console.error('[Alta]', err.message);
     return res.status(502).json({ error: err.message });
   }
 });
 
-// ── Ephemeral – Crear ────────────────────────────────────
-router.post('/ephemeral/create', async (req, res) => {
+// ── Baja de empleado ─────────────────────────────────────
+router.post('/employees/baja', async (req, res) => {
   try {
-    const { envId } = req.body || {};
-    if (!envId) {
-      return res.status(400).json({ error: 'Campo requerido: envId' });
+    const { employee_username, employee_oracle_username } = req.body || {};
+
+    if (!employee_username || !employee_oracle_username) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    const extraVars = { envId, ttl_hours: 3 };
-    const wfId  = process.env.AAP_WF_EPHEMERAL_PROVISION;
-    const token = tokenForRole(req.user.role);
-    const result = await launchAapWorkflow(wfId, extraVars, token);
+    const extraVars = {
+      employee_action: 'baja',
+      employee_username,
+      employee_oracle_username,
+    };
+
+    const result = await launchWorkflow(process.env.AAP_WF_EMP_BAJA, extraVars);
     return res.json(result);
   } catch (err) {
-    console.error('[Ephemeral Create]', err.message);
+    console.error('[Baja]', err.message);
     return res.status(502).json({ error: err.message });
   }
 });
 
-// ── Ephemeral – Eliminar ─────────────────────────────────
-router.post('/ephemeral/delete', async (req, res) => {
+// ── Cambio de rol ────────────────────────────────────────
+router.post('/employees/cambio-rol', async (req, res) => {
   try {
-    const { envId } = req.body || {};
-    if (!envId) {
-      return res.status(400).json({ error: 'Campo requerido: envId' });
+    const { employee_oracle_username, employee_role_anterior, employee_role } = req.body || {};
+
+    if (!employee_oracle_username || !employee_role_anterior || !employee_role) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    const extraVars = { envId };
-    const wfId  = process.env.AAP_WF_EPHEMERAL_DELETE;
-    const token = tokenForRole(req.user.role);
-    const result = await launchAapWorkflow(wfId, extraVars, token);
+    const extraVars = {
+      employee_action: 'cambio_rol',
+      employee_oracle_username,
+      employee_role_anterior,
+      employee_role,
+    };
+
+    const result = await launchWorkflow(process.env.AAP_WF_EMP_CAMBIO_ROL, extraVars);
     return res.json(result);
   } catch (err) {
-    console.error('[Ephemeral Delete]', err.message);
+    console.error('[Cambio Rol]', err.message);
+    return res.status(502).json({ error: err.message });
+  }
+});
+
+// ── Reset de contraseña ──────────────────────────────────
+router.post('/employees/reset', async (req, res) => {
+  try {
+    const { employee_username, employee_password } = req.body || {};
+
+    if (!employee_username || !employee_password) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
+    }
+
+    const extraVars = {
+      employee_action: 'reset',
+      employee_username,
+      employee_password,
+    };
+
+    const result = await launchJobTemplate(process.env.AAP_JT_EMP_AD_RESET, extraVars);
+    return res.json(result);
+  } catch (err) {
+    console.error('[Reset]', err.message);
     return res.status(502).json({ error: err.message });
   }
 });
