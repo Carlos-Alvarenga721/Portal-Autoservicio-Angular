@@ -9,16 +9,16 @@ import { JobsService, JobResponse } from '../../services/jobs.service';
   template: `
     <div class="page">
       <section class="card">
-        <h2>Auditoria CIS</h2>
+        <h2>Estandarizacion CIS</h2>
         <p>Ejecuta el workflow de cumplimiento CIS Level 1 sobre el servidor objetivo definido en AAP.</p>
 
         <div class="details">
-          <div><strong>Operacion:</strong> auditoria y remediacion del flujo CIS</div>
+          <div><strong>Operacion:</strong> Estandarizacion y remediacion del flujo CIS</div>
           <div><strong>Ejecucion:</strong> se dispara directamente desde el portal hacia AAP</div>
         </div>
 
         <button (click)="runAudit()" [disabled]="loading" class="btn">
-          {{ loading ? 'Ejecutando...' : 'Ejecutar auditoria CIS' }}
+          {{ loading ? 'Ejecutando...' : 'Ejecutar Tarea' }}
         </button>
       </section>
 

@@ -13,8 +13,8 @@ import {
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page">
-      <h2>Entornos Efimeros</h2>
-      <p>Crea o elimina una VM efimera en GCP usando los job templates de AAP.</p>
+      <h2>Entornos Bajo Demanda</h2>
+      <p>Crea o elimina una VM en GCP usando los job templates de AAP.</p>
 
       <div class="grid">
         <section class="card">

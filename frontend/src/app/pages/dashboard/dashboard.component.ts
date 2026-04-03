@@ -20,13 +20,13 @@ import { AuthService } from '../../services/auth.service';
         <a routerLink="/employees" class="card">
           <div class="card-icon">👤</div>
           <h3>Gestión Empleados</h3>
-          <p>Alta de empleados en AD y BD</p>
+          <p>Procesos de empleados en AD y BD</p>
         </a>
 
         <a routerLink="/ephemeral" class="card">
           <div class="card-icon">☁️</div>
-          <h3>Entornos Efímeros</h3>
-          <p>Crear o eliminar entornos temporales</p>
+          <h3>Entornos Temporales</h3>
+          <p>Crear o eliminar entornos bajo demanda</p>
         </a>
       </div>
     </div>
