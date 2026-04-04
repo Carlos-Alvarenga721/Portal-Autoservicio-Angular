@@ -18,12 +18,12 @@ import {
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page">
-      <h2>Gestion de Empleados</h2>
-      <p>Dispara los workflows y job templates de AAP para alta, baja, cambio de rol y reseteo de contrasena.</p>
+      <h2>Gestión de Empleados</h2>
+      <p>Realiza altas, bajas, cambios de rol y restablecimiento de contraseña desde formularios conectados con AAP.</p>
 
       <section class="card operation-card">
         <label class="selector">
-          Operacion *
+          Operación *
           <select [(ngModel)]="selectedOperation" name="selected_operation" class="selector-input">
             <option value="alta">Alta</option>
             <option value="baja">Baja</option>
@@ -40,7 +40,7 @@ import {
             <div class="helper-banner">
               <div class="helper-text">
                 <strong>Usuario Oracle</strong>
-                <span>Generalo primero a partir del username AD y luego completa el resto del formulario.</span>
+                <span>Genéralo primero a partir del username AD y luego completa el resto del formulario.</span>
               </div>
               <button type="button" class="btn btn-secondary btn-inline" (click)="autofillOracleUsername()" [disabled]="loading">
                 Generar usuario Oracle
@@ -148,7 +148,7 @@ import {
     </div>
   `,
   styles: [`
-    .page { padding: 2rem; max-width: 1100px; }
+    .page { padding: 2rem; max-width: 960px; }
     h2 { color: #1a1a2e; margin-bottom: .5rem; }
     p { color: #555; margin-bottom: 1.5rem; }
     .operation-card { margin-bottom: 1.25rem; max-width: 540px; }

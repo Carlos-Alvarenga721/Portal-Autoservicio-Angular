@@ -15,12 +15,12 @@ import {
   template: `
     <div class="page">
       <h2>Entornos Bajo Demanda</h2>
-      <p>Crea o elimina una Máquina Virtual en GCP usando los job templates de AAP.</p>
+      <p>Crea o elimina Entornos Temporales en GCP usando los job templates de AAP.</p>
 
       <div class="grid">
         <section class="card card-create">
-          <h3>Crear Máquina Virtual</h3>
-          <p class="card-copy">Provisiona una Máquina Virtual temporal en GCP con los parámetros mínimos necesarios para la demo.</p>
+          <h3>Crear Entorno Temporal</h3>
+          <p class="card-copy">Provisiona un Entorno Temporal en GCP con los parámetros mínimos necesarios para la demo.</p>
 
           <form (ngSubmit)="createVm()" class="form">
             <label>Nombre de instancia *
@@ -50,13 +50,13 @@ import {
             </label>
 
             <button type="submit" [disabled]="loading" class="btn btn-create btn-primary">
-              {{ loading && action === 'create' ? 'Creando...' : 'Crear Máquina Virtual' }}
+              {{ loading && action === 'create' ? 'Creando...' : 'Crear Entorno Temporal' }}
             </button>
           </form>
         </section>
 
         <section class="card card-delete">
-          <h3>Eliminar Máquina Virtual</h3>
+          <h3>Eliminar Entorno Temporal</h3>
           <p class="card-copy">Usa esta acción solo cuando ya no necesites el entorno. La eliminación impacta directamente en GCP.</p>
 
           <div class="delete-warning">
@@ -70,7 +70,7 @@ import {
             </label>
 
             <button type="submit" [disabled]="loading" class="btn btn-delete btn-primary">
-              {{ loading && action === 'delete' ? 'Eliminando...' : 'Eliminar Máquina Virtual' }}
+              {{ loading && action === 'delete' ? 'Eliminando...' : 'Eliminar Entorno Temporal' }}
             </button>
           </form>
         </section>
@@ -89,7 +89,7 @@ import {
     </div>
   `,
   styles: [`
-    .page { padding: 2rem; max-width: 1000px; }
+    .page { padding: 2rem; max-width: 960px; }
     h2 { color: #1a1a2e; margin-bottom: .5rem; }
     p { color: #555; margin-bottom: 1.5rem; }
     .grid {
@@ -191,7 +191,7 @@ export class EphemeralComponent implements OnDestroy {
 
     this.jobs.ephemeralCreate(this.createForm).subscribe({
       next: (res) => this.handleSuccess(res),
-      error: (err) => this.handleError(err, 'Error al crear VM efimera'),
+      error: (err) => this.handleError(err, 'Error al crear el entorno temporal'),
     });
   }
 
@@ -200,7 +200,7 @@ export class EphemeralComponent implements OnDestroy {
 
     this.jobs.ephemeralDelete({ instance_name: this.deleteInstanceName }).subscribe({
       next: (res) => this.handleSuccess(res),
-      error: (err) => this.handleError(err, 'Error al eliminar VM efimera'),
+      error: (err) => this.handleError(err, 'Error al eliminar el entorno temporal'),
     });
   }
 
@@ -269,7 +269,7 @@ export class EphemeralComponent implements OnDestroy {
     if (!rawError) return fallback;
 
     if (rawError.includes('already exists')) {
-      return 'La VM no pudo crearse porque el nombre de instancia ya existe en GCP.';
+      return 'No fue posible crear el entorno temporal porque ese nombre de instancia ya existe en GCP.';
     }
 
     if (rawError.includes('Faltan campos obligatorios')) {
@@ -277,11 +277,11 @@ export class EphemeralComponent implements OnDestroy {
     }
 
     if (rawError.includes('Invalid value for field')) {
-      return 'GCP rechazo uno de los parametros enviados. Revisa nombre, red, imagen o tamano de disco.';
+      return 'GCP rechazó uno de los parámetros enviados. Revisa el nombre, la red, la imagen o el tamaño del disco.';
     }
 
     if (rawError.includes('not found')) {
-      return 'La VM indicada no existe o ya fue eliminada.';
+      return 'El entorno temporal indicado no existe o ya fue eliminado.';
     }
 
     return rawError

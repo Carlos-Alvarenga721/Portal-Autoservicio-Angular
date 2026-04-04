@@ -9,16 +9,16 @@ import { JobsService, JobResponse, JobStatusResponse } from '../../services/jobs
   template: `
     <div class="page">
       <section class="card">
-        <h2>Estandarizacion CIS</h2>
-        <p>Ejecuta el workflow de cumplimiento CIS Level 1 sobre el servidor objetivo definido en AAP.</p>
+        <h2>Estandarización CIS</h2>
+        <p>Ejecuta la revisión de cumplimiento CIS Level 1 sobre el servidor objetivo definido en AAP.</p>
 
         <div class="details">
-          <div><strong>Operacion:</strong> Estandarizacion y remediacion del flujo CIS</div>
-          <div><strong>Ejecucion:</strong> se dispara directamente desde el portal hacia AAP</div>
+          <div><strong>Operación:</strong> estandarización y remediación del flujo CIS</div>
+          <div><strong>Ejecución:</strong> se lanza directamente desde este portal hacia AAP</div>
         </div>
 
         <button (click)="runAudit()" [disabled]="loading" class="btn">
-          {{ loading ? 'Ejecutando...' : 'Ejecutar Tarea' }}
+          {{ loading ? 'Ejecutando...' : 'Ejecutar revisión CIS' }}
         </button>
       </section>
 
@@ -35,7 +35,7 @@ import { JobsService, JobResponse, JobStatusResponse } from '../../services/jobs
     </div>
   `,
   styles: [`
-    .page { padding: 2rem; max-width: 760px; }
+    .page { padding: 2rem; max-width: 960px; }
     .card {
       background: #fff;
       border-radius: 10px;
@@ -98,7 +98,7 @@ export class CisComponent implements OnDestroy {
         this.startPolling(res.job_id);
       },
       error: (err) => {
-        this.error = this.formatErrorMessage(err.error?.error, 'Error al lanzar auditoria');
+        this.error = this.formatErrorMessage(err.error?.error, 'Error al lanzar la revisión CIS');
         this.loading = false;
       },
     });
@@ -149,7 +149,7 @@ export class CisComponent implements OnDestroy {
     if (!rawError) return fallback;
 
     if (rawError.includes('Token no proporcionado') || rawError.includes('Token inválido')) {
-      return 'La sesion no es valida. Vuelve a iniciar sesion en el portal.';
+      return 'La sesión no es válida. Vuelve a iniciar sesión en el portal.';
     }
 
     if (rawError.includes('AAP respondió') || rawError.includes('AAP responded')) {

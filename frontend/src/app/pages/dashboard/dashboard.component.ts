@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
         <div>
           <span class="eyebrow">Portal Self-Service</span>
           <h2>Módulos de Automatización</h2>
-          <p class="intro">Accede desde un solo panel a los flujos de seguridad, gestión de empleados y aprovisionamiento temporal conectados con AAP.</p>
+          <p class="intro">Accede desde un solo panel a los procesos de seguridad, gestión de empleados y entornos temporales conectados con AAP.</p>
         </div>
         <div class="summary" *ngIf="auth.user as u">
           <span class="summary-label">Sesión activa</span>
@@ -26,7 +26,7 @@ import { AuthService } from '../../services/auth.service';
         <a routerLink="/cis" class="card">
           <div class="card-icon">🛡️</div>
           <h3>Seguridad CIS</h3>
-          <p>Ejecuta la estandarización CIS y revisa el estado del workflow en tiempo real.</p>
+          <p>Ejecuta la revisión de cumplimiento CIS y consulta el estado del workflow en tiempo real.</p>
         </a>
 
         <a routerLink="/employees" class="card">
@@ -38,7 +38,7 @@ import { AuthService } from '../../services/auth.service';
         <a routerLink="/ephemeral" class="card">
           <div class="card-icon">☁️</div>
           <h3>Entornos Temporales</h3>
-          <p>Crea o elimina Máquinas Virtuales bajo demanda en GCP con seguimiento de estado.</p>
+          <p>Crea o elimina entornos temporales bajo demanda en GCP con seguimiento de estado.</p>
         </a>
       </div>
     </div>
