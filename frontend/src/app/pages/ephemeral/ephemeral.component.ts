@@ -18,8 +18,9 @@ import {
       <p>Crea o elimina una VM en GCP usando los job templates de AAP.</p>
 
       <div class="grid">
-        <section class="card">
+        <section class="card card-create">
           <h3>Crear VM</h3>
+          <p class="card-copy">Provisiona una instancia temporal en GCP con los parámetros mínimos necesarios para la demo.</p>
 
           <form (ngSubmit)="createVm()" class="form">
             <label>Nombre de instancia *
@@ -48,21 +49,27 @@ import {
               <input [(ngModel)]="createForm.ttl_hours" name="ttl_hours" type="number" min="1" required />
             </label>
 
-            <button type="submit" [disabled]="loading" class="btn btn-create">
+            <button type="submit" [disabled]="loading" class="btn btn-create btn-primary">
               {{ loading && action === 'create' ? 'Creando...' : 'Crear VM' }}
             </button>
           </form>
         </section>
 
-        <section class="card">
+        <section class="card card-delete">
           <h3>Eliminar VM</h3>
+          <p class="card-copy">Usa esta acción solo cuando ya no necesites el entorno. La eliminación impacta directamente en GCP.</p>
+
+          <div class="delete-warning">
+            <strong>Acción destructiva</strong>
+            <span>Verifica el nombre exacto de la instancia antes de continuar.</span>
+          </div>
 
           <form (ngSubmit)="deleteVm()" class="form">
             <label>Nombre de instancia *
               <input [(ngModel)]="deleteInstanceName" name="delete_instance_name" placeholder="ej: demo-rhel-01" required />
             </label>
 
-            <button type="submit" [disabled]="loading" class="btn btn-delete">
+            <button type="submit" [disabled]="loading" class="btn btn-delete btn-primary">
               {{ loading && action === 'delete' ? 'Eliminando...' : 'Eliminar VM' }}
             </button>
           </form>
@@ -87,8 +94,9 @@ import {
     p { color: #555; margin-bottom: 1.5rem; }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: minmax(340px, 1.2fr) minmax(280px, .8fr);
       gap: 1.25rem;
+      align-items: start;
     }
     .card {
       background: #fff;
@@ -96,7 +104,14 @@ import {
       padding: 1.25rem;
       box-shadow: 0 2px 10px rgba(0,0,0,.08);
     }
+    .card-create { border-top: 4px solid #27ae60; }
+    .card-delete { border-top: 4px solid #e74c3c; }
     h3 { margin: 0 0 1rem; color: #1a1a2e; }
+    .card-copy {
+      margin: 0 0 1rem;
+      color: #5a6573;
+      font-size: .92rem;
+    }
     .form { display: flex; flex-direction: column; gap: .75rem; }
     label { display: flex; flex-direction: column; font-weight: 600; color: #333; font-size: .9rem; }
     input, select {
@@ -104,11 +119,27 @@ import {
       border: 1px solid #ccc; border-radius: 4px;
       background: #fff;
     }
+    .delete-warning {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+      margin-bottom: 1rem;
+      padding: .9rem 1rem;
+      border-radius: 8px;
+      background: #fff0ee;
+      color: #7a2b21;
+    }
+    .delete-warning span {
+      font-size: .85rem;
+      color: #944236;
+    }
     .btn {
       padding: .75rem 1rem; font-size: 1rem;
       color: #fff; border: none; border-radius: 4px;
       cursor: pointer; font-weight: 600; margin-top: .5rem;
+      width: fit-content;
     }
+    .btn-primary { min-width: 170px; }
     .btn:disabled { opacity: .6; cursor: not-allowed; }
     .btn-create { background: #27ae60; }
     .btn-create:hover:not(:disabled) { background: #219a52; }
@@ -125,6 +156,11 @@ import {
     .status-failed { background: #f8d7da; color: #721c24; }
     .success { background: #d4edda; color: #155724; }
     .error   { background: #f8d7da; color: #721c24; }
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
   `]
 })
 export class EphemeralComponent implements OnDestroy {
