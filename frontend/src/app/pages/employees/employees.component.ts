@@ -24,11 +24,11 @@ import {
       <section class="card operation-card">
         <label class="selector">
           Operacion *
-          <select [(ngModel)]="selectedOperation" name="selected_operation">
+          <select [(ngModel)]="selectedOperation" name="selected_operation" class="selector-input">
             <option value="alta">Alta</option>
             <option value="baja">Baja</option>
             <option value="cambio-rol">Cambio de rol</option>
-            <option value="reset">Reset de contrasena</option>
+            <option value="reset">Reset de contraseña</option>
           </select>
         </label>
       </section>
@@ -37,13 +37,23 @@ import {
         <section class="card" *ngIf="selectedOperation === 'alta'">
           <h3>Alta</h3>
           <form (ngSubmit)="onAlta()" class="form">
+            <div class="helper-banner">
+              <div class="helper-text">
+                <strong>Usuario Oracle</strong>
+                <span>Generalo primero a partir del username AD y luego completa el resto del formulario.</span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-inline" (click)="autofillOracleUsername()" [disabled]="loading">
+                Generar usuario Oracle
+              </button>
+            </div>
+
             <label>Username AD *
               <input [(ngModel)]="alta.employee_username" name="alta_username" required />
             </label>
             <label>Nombre completo *
               <input [(ngModel)]="alta.employee_full_name" name="alta_full_name" required placeholder="Nombre Apellido" />
             </label>
-            <label>Contrasena *
+            <label>Contraseña *
               <input [(ngModel)]="alta.employee_password" name="alta_password" type="password" required />
             </label>
             <label>Usuario Oracle *
@@ -61,14 +71,9 @@ import {
               </select>
             </label>
 
-            <div class="inline-actions">
-              <button type="button" class="btn btn-secondary" (click)="autofillOracleUsername()" [disabled]="loading">
-                Generar usuario Oracle
-              </button>
-              <button type="submit" [disabled]="loading" class="btn">
-                {{ loading && action === 'alta' ? 'Ejecutando...' : 'Lanzar alta' }}
-              </button>
-            </div>
+            <button type="submit" [disabled]="loading" class="btn btn-primary">
+              {{ loading && action === 'alta' ? 'Ejecutando...' : 'Lanzar alta' }}
+            </button>
           </form>
         </section>
 
@@ -114,12 +119,12 @@ import {
         </section>
 
         <section class="card" *ngIf="selectedOperation === 'reset'">
-          <h3>Reset de contrasena AD</h3>
+          <h3>Reset de contraseña AD</h3>
           <form (ngSubmit)="onReset()" class="form">
             <label>Username AD *
               <input [(ngModel)]="reset.employee_username" name="reset_username" required />
             </label>
-            <label>Nueva contrasena *
+            <label>Nueva contraseña *
               <input [(ngModel)]="reset.employee_password" name="reset_password" type="password" required />
             </label>
 
@@ -146,7 +151,7 @@ import {
     .page { padding: 2rem; max-width: 1100px; }
     h2 { color: #1a1a2e; margin-bottom: .5rem; }
     p { color: #555; margin-bottom: 1.5rem; }
-    .operation-card { margin-bottom: 1.25rem; }
+    .operation-card { margin-bottom: 1.25rem; max-width: 540px; }
     .grid {
       display: grid;
       grid-template-columns: minmax(320px, 640px);
@@ -166,6 +171,7 @@ import {
       color: #333;
       font-size: .9rem;
     }
+    .selector-input { max-width: 300px; }
     .form { display: flex; flex-direction: column; gap: .75rem; }
     label { display: flex; flex-direction: column; font-weight: 600; color: #333; font-size: .9rem; }
     input, select {
@@ -173,19 +179,35 @@ import {
       border: 1px solid #ccc; border-radius: 4px;
       background: #fff;
     }
-    .inline-actions {
+    .helper-banner {
       display: flex;
-      gap: .75rem;
-      flex-wrap: wrap;
-      margin-top: .25rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .9rem 1rem;
+      border-radius: 8px;
+      background: #eef4fb;
+      color: #1f3954;
+    }
+    .helper-text strong,
+    .helper-text span {
+      display: block;
+    }
+    .helper-text span {
+      margin-top: .2rem;
+      font-size: .85rem;
+      color: #48627c;
     }
     .btn {
       padding: .75rem 1rem; font-size: 1rem; margin-top: .5rem;
       background: #e74c3c; color: #fff; border: none;
       border-radius: 4px; cursor: pointer; font-weight: 600;
+      width: fit-content;
     }
+    .btn-primary { min-width: 170px; }
     .btn-secondary { background: #34495e; }
     .btn-secondary:hover:not(:disabled) { background: #243342; }
+    .btn-inline { margin-top: 0; white-space: nowrap; }
     .btn:disabled { opacity: .6; cursor: not-allowed; }
     .btn:hover:not(:disabled) { background: #c0392b; }
     .result {
@@ -199,6 +221,15 @@ import {
     .status-failed { background: #f8d7da; color: #721c24; }
     .success { background: #d4edda; color: #155724; }
     .error   { background: #f8d7da; color: #721c24; }
+    @media (max-width: 640px) {
+      .helper-banner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .selector-input {
+        max-width: 100%;
+      }
+    }
   `]
 })
 export class EmployeesComponent implements OnDestroy {
