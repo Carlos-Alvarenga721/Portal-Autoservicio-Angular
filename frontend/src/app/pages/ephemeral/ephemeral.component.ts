@@ -15,12 +15,12 @@ import {
   template: `
     <div class="page">
       <h2>Entornos Bajo Demanda</h2>
-      <p>Crea o elimina una VM en GCP usando los job templates de AAP.</p>
+      <p>Crea o elimina una Máquina Virtual en GCP usando los job templates de AAP.</p>
 
       <div class="grid">
         <section class="card card-create">
-          <h3>Crear VM</h3>
-          <p class="card-copy">Provisiona una instancia temporal en GCP con los parámetros mínimos necesarios para la demo.</p>
+          <h3>Crear Máquina Virtual</h3>
+          <p class="card-copy">Provisiona una Máquina Virtual temporal en GCP con los parámetros mínimos necesarios para la demo.</p>
 
           <form (ngSubmit)="createVm()" class="form">
             <label>Nombre de instancia *
@@ -50,13 +50,13 @@ import {
             </label>
 
             <button type="submit" [disabled]="loading" class="btn btn-create btn-primary">
-              {{ loading && action === 'create' ? 'Creando...' : 'Crear VM' }}
+              {{ loading && action === 'create' ? 'Creando...' : 'Crear Máquina Virtual' }}
             </button>
           </form>
         </section>
 
         <section class="card card-delete">
-          <h3>Eliminar VM</h3>
+          <h3>Eliminar Máquina Virtual</h3>
           <p class="card-copy">Usa esta acción solo cuando ya no necesites el entorno. La eliminación impacta directamente en GCP.</p>
 
           <div class="delete-warning">
@@ -70,7 +70,7 @@ import {
             </label>
 
             <button type="submit" [disabled]="loading" class="btn btn-delete btn-primary">
-              {{ loading && action === 'delete' ? 'Eliminando...' : 'Eliminar VM' }}
+              {{ loading && action === 'delete' ? 'Eliminando...' : 'Eliminar Máquina Virtual' }}
             </button>
           </form>
         </section>

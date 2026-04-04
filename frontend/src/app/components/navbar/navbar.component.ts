@@ -16,7 +16,7 @@ import { AuthService } from '../../services/auth.service';
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a>
         <a routerLink="/cis" routerLinkActive="active">CIS</a>
         <a routerLink="/employees" routerLinkActive="active">Empleados</a>
-        <a routerLink="/ephemeral" routerLinkActive="active">Efímeros</a>
+        <a routerLink="/ephemeral" routerLinkActive="active">Entornos Temporales</a>
       </div>
       <div class="user-info" *ngIf="auth.user as u">
         <span class="badge" [class.ops]="u.role === 'ops'">{{ u.role }}</span>
