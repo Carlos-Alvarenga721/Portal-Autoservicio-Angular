@@ -14,12 +14,12 @@ import { AuthService } from '../../services/auth.service';
       </div>
       <div class="links">
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a>
-        <a routerLink="/cis" routerLinkActive="active">CIS</a>
-        <a routerLink="/employees" routerLinkActive="active">Empleados</a>
-        <a routerLink="/ephemeral" routerLinkActive="active">Entornos Temporales</a>
+        <a *ngIf="auth.hasAccess('cis')" routerLink="/cis" routerLinkActive="active">CIS</a>
+        <a *ngIf="auth.hasAccess('employees')" routerLink="/employees" routerLinkActive="active">Empleados</a>
+        <a *ngIf="auth.hasAccess('ephemeral')" routerLink="/ephemeral" routerLinkActive="active">Entornos Temporales</a>
       </div>
       <div class="user-info" *ngIf="auth.user as u">
-        <span class="badge" [class.ops]="u.role === 'ops'">{{ u.role }}</span>
+        <span class="badge" [class.operador]="u.role === 'operador'">{{ u.role }}</span>
         <span class="email">{{ u.email }}</span>
         <button class="logout-btn" (click)="auth.logout()">Salir</button>
       </div>
@@ -49,7 +49,7 @@ import { AuthService } from '../../services/auth.service';
       border-radius: 3px; font-size: .75rem; text-transform: uppercase;
       font-weight: 700;
     }
-    .badge.ops { background: #e67e22; }
+    .badge.operador { background: #e67e22; }
     .email { color: rgba(255,255,255,.75); }
     .logout-btn {
       background: transparent; border: 1px solid rgba(255,255,255,.3);

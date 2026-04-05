@@ -136,7 +136,7 @@ import {
       </div>
 
       <div class="result success" *ngIf="result">
-        Job lanzado en AAP. <strong>job_id: {{ result.job_id }}</strong>
+        Solicitud enviada exitosamente a AAP.
       </div>
       <div class="result status" *ngIf="jobStatus" [class.status-pending]="jobStatus.status === 'pending'" [class.status-running]="jobStatus.status === 'running'" [class.status-successful]="jobStatus.status === 'successful'" [class.status-failed]="isFailedStatus(jobStatus.status)">
         Estado actual: <strong>{{ getStatusLabel(jobStatus.status) }}</strong>

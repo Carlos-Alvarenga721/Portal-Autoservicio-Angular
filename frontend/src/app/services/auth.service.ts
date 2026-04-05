@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 
 export interface User {
   email: string;
-  role: 'commercial' | 'ops';
+  role: 'soporte' | 'operador';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -30,6 +30,20 @@ export class AuthService {
 
   get isLoggedIn(): boolean {
     return !!this.token;
+  }
+
+  get isOperador(): boolean {
+    return this.user?.role === 'operador';
+  }
+
+  get isSoporte(): boolean {
+    return this.user?.role === 'soporte';
+  }
+
+  hasAccess(section: 'cis' | 'employees' | 'ephemeral'): boolean {
+    if (!this.user) return false;
+    if (this.user.role === 'operador') return true;
+    return section === 'employees';
   }
 
   /** Llama a este método al cargar la app para capturar el token que Google devuelve en la URL */

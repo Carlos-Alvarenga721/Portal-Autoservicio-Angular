@@ -19,10 +19,47 @@ function getDb() {
 function initDb() {
   const conn = getDb();
 
+  // Migra roles legacy ops/commercial hacia operador/soporte.
+  conn.exec(`
+    CREATE TABLE IF NOT EXISTS users_new (
+      email  TEXT PRIMARY KEY,
+      role   TEXT NOT NULL CHECK(role IN ('soporte','operador')),
+      active INTEGER NOT NULL DEFAULT 1
+    );
+  `);
+
+  const currentTable = conn.prepare(`
+    SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users'
+  `).get();
+
+  if (currentTable) {
+    conn.exec(`
+      INSERT OR REPLACE INTO users_new (email, role, active)
+      SELECT
+        email,
+        CASE
+          WHEN role = 'ops' THEN 'operador'
+          WHEN role = 'commercial' THEN 'soporte'
+          ELSE role
+        END,
+        active
+      FROM users;
+    `);
+
+    conn.exec(`
+      DROP TABLE users;
+      ALTER TABLE users_new RENAME TO users;
+    `);
+  } else {
+    conn.exec(`
+      ALTER TABLE users_new RENAME TO users;
+    `);
+  }
+
   conn.exec(`
     CREATE TABLE IF NOT EXISTS users (
       email  TEXT PRIMARY KEY,
-      role   TEXT NOT NULL CHECK(role IN ('commercial','ops')),
+      role   TEXT NOT NULL CHECK(role IN ('soporte','operador')),
       active INTEGER NOT NULL DEFAULT 1
     );
   `);
@@ -31,8 +68,8 @@ function initDb() {
     'INSERT OR IGNORE INTO users (email, role, active) VALUES (?, ?, 1)'
   );
 
-  insert.run('comercial@empresa.com', 'commercial');
-  insert.run('ops@empresa.com',       'ops');
+  insert.run('soporte@empresa.com',  'soporte');
+  insert.run('operador@empresa.com', 'operador');
 
   console.log('✔  Base de datos inicializada');
 }

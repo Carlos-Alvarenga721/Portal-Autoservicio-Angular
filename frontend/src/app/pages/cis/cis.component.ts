@@ -23,7 +23,7 @@ import { JobsService, JobResponse, JobStatusResponse } from '../../services/jobs
       </section>
 
       <div class="result success" *ngIf="result">
-        Workflow lanzado en AAP. <strong>job_id: {{ result.job_id }}</strong>
+        Workflow lanzado exitosamente.
       </div>
       <div class="result status" *ngIf="jobStatus" [class.status-pending]="jobStatus.status === 'pending'" [class.status-running]="jobStatus.status === 'running'" [class.status-successful]="jobStatus.status === 'successful'" [class.status-failed]="isFailedStatus(jobStatus.status)">
         Estado actual: <strong>{{ getStatusLabel(jobStatus.status) }}</strong>

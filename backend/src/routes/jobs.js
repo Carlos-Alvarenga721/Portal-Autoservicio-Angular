@@ -2,14 +2,14 @@
 // Rutas para disparar jobs en AAP
 // ─────────────────────────────────────────────────────────
 const { Router } = require('express');
-const { authRequired }                    = require('../auth');
+const { authRequired, requireRole }       = require('../auth');
 const { launchWorkflow, launchJobTemplate, getUnifiedJobStatus } = require('../aap');
 
 const router = Router();
 router.use(authRequired);
 
 // ── CIS Level 1 ──────────────────────────────────────────
-router.post('/cis', async (req, res) => {
+router.post('/cis', requireRole(['operador']), async (req, res) => {
   try {
     const extraVars = {
       report_recipient: req.user?.email,
@@ -142,7 +142,7 @@ router.post('/employees/reset', async (req, res) => {
 });
 
 // ── VM efímera - crear ───────────────────────────────────
-router.post('/ephemeral/create', async (req, res) => {
+router.post('/ephemeral/create', requireRole(['operador']), async (req, res) => {
   try {
     const {
       instance_name,
@@ -174,7 +174,7 @@ router.post('/ephemeral/create', async (req, res) => {
 });
 
 // ── VM efímera - eliminar ────────────────────────────────
-router.post('/ephemeral/delete', async (req, res) => {
+router.post('/ephemeral/delete', requireRole(['operador']), async (req, res) => {
   try {
     const { instance_name } = req.body || {};
 

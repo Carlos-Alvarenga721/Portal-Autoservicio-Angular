@@ -23,19 +23,19 @@ import { AuthService } from '../../services/auth.service';
       </section>
 
       <div class="cards">
-        <a routerLink="/cis" class="card">
+        <a *ngIf="auth.hasAccess('cis')" routerLink="/cis" class="card">
           <div class="card-icon">🛡️</div>
           <h3>Seguridad CIS</h3>
           <p>Ejecuta la revisión de cumplimiento CIS y consulta el estado del workflow en tiempo real.</p>
         </a>
 
-        <a routerLink="/employees" class="card">
+        <a *ngIf="auth.hasAccess('employees')" routerLink="/employees" class="card">
           <div class="card-icon">👤</div>
           <h3>Gestión de Empleados</h3>
           <p>Lanza altas, bajas, cambios de rol y reseteo de contraseña desde formularios guiados.</p>
         </a>
 
-        <a routerLink="/ephemeral" class="card">
+        <a *ngIf="auth.hasAccess('ephemeral')" routerLink="/ephemeral" class="card">
           <div class="card-icon">☁️</div>
           <h3>Entornos Temporales</h3>
           <p>Crea o elimina entornos temporales bajo demanda en GCP con seguimiento de estado.</p>
