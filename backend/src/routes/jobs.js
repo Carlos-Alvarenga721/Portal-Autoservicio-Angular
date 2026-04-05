@@ -11,7 +11,11 @@ router.use(authRequired);
 // ── CIS Level 1 ──────────────────────────────────────────
 router.post('/cis', async (req, res) => {
   try {
-    const result = await launchWorkflow(process.env.AAP_WF_CIS);
+    const extraVars = {
+      report_recipient: req.user?.email,
+    };
+
+    const result = await launchWorkflow(process.env.AAP_WF_CIS, extraVars);
     return res.json(result);
   } catch (err) {
     console.error('[CIS]', err.message);
